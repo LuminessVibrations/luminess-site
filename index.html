@@ -390,7 +390,7 @@ a.arch:hover{box-shadow:0 0 54px rgba(230,195,122,.3),0 30px 60px rgba(0,0,0,.5)
     <div class="form-actions"><button class="btn btn-solid" type="submit">Begin Your Journey</button><span class="form-msg" role="status" aria-live="polite"></span></div>
   </form>
   <div class="news reveal"><h3>Stay in tune.</h3><p>Upcoming events, gatherings and special offerings.</p>
-    <form data-url="/api/subscribe" data-ok="Almost there, please check your inbox (and your spam folder) for a confirmation email to complete your subscription. ✦" novalidate>
+    <form data-url="/api/subscribe" data-ok="Thank you, I’ve received your email and will add you to the list. ✦" novalidate>
       <input type="email" name="email" placeholder="Your email" autocomplete="email" required maxlength="191" aria-label="Email address">
       <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="btn btn-solid" type="submit">Subscribe</button><span class="form-msg" role="status" aria-live="polite"></span></form></div>
@@ -492,7 +492,7 @@ a.arch:hover{box-shadow:0 0 54px rgba(230,195,122,.3),0 30px 60px rgba(0,0,0,.5)
 
 <footer><div class="wrap">
   <div class="foot-news" id="newsletter"><h3>Stay in tune.</h3><p>Upcoming events, gatherings and special offerings.</p>
-    <form data-url="/api/subscribe" data-ok="Almost there, please check your inbox (and your spam folder) for a confirmation email to complete your subscription. ✦" novalidate>
+    <form data-url="/api/subscribe" data-ok="Thank you, I’ve received your email and will add you to the list. ✦" novalidate>
       <input type="email" name="email" placeholder="Your email" autocomplete="email" required maxlength="191" aria-label="Email address">
       <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="btn btn-solid" type="submit">Subscribe</button><span class="form-msg" role="status" aria-live="polite"></span></form></div>
@@ -554,10 +554,10 @@ document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('i
 document.querySelectorAll('form[data-url]').forEach(f=>f.addEventListener('submit',async e=>{
   e.preventDefault();
   const btn=f.querySelector('button[type=submit]'),msg=f.querySelector('.form-msg'),d=Object.fromEntries(new FormData(f).entries());
-  msg.className='form-msg';const bad=[...f.querySelectorAll('[required]')].some(x=>!x.value.trim())||(d.email&&!/^\S+@\S+\.\S+$/.test(d.email));if(bad){msg.className='form-msg err';msg.textContent='Please complete the required fields with a valid email.';return}const o=btn.textContent;btn.disabled=true;btn.textContent='…';
-  try{const r=await fetch(f.dataset.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
-    if(r.ok&&j.ok){f.reset();msg.className='form-msg ok';msg.textContent=f.dataset.ok}else{msg.className='form-msg err';msg.textContent=(j&&j.error)||'Your message was not sent. This form is not connected to a destination yet.'}
-  }catch(x){msg.className='form-msg err';msg.textContent='Your message was not sent. This form is not connected to a destination yet.'}
+  if(d.company||d.website)return;msg.className='form-msg';const bad=[...f.querySelectorAll('[required]')].some(x=>!x.value.trim())||(d.email&&!/^\S+@\S+\.\S+$/.test(d.email));if(bad){msg.className='form-msg err';msg.textContent='Please complete the required fields with a valid email.';return}const o=btn.textContent;btn.disabled=true;btn.textContent='…';
+  try{const news=f.dataset.url.indexOf('subscribe')>-1;d._subject=news?'Newsletter signup':'Website inquiry: '+(d.interest||'general');d.form=news?'Newsletter':'Inquiry';delete d.company;delete d.website;const r=await fetch('https://formspree.io/f/mljjqnnj',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(d)});const j=await r.json().catch(()=>({}));
+    if(r.ok&&j.ok){f.reset();msg.className='form-msg ok';msg.textContent=f.dataset.ok}else{msg.className='form-msg err';msg.textContent=(j&&j.error)||'Your message was not sent. Please try again in a moment.'}
+  }catch(x){msg.className='form-msg err';msg.textContent='Your message was not sent. Please try again in a moment.'}
   finally{btn.disabled=false;btn.textContent=o}
 }));
 // roots: a few thick roots grow in from both sides and curl into a spiral
